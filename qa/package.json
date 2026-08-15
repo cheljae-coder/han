@@ -1,0 +1,16 @@
+{
+  "name": "smart-hanwoo-r49-qa",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node run-all.mjs"
+  },
+  "dependencies": {
+    "fake-indexeddb": "6.2.5",
+    "jsdom": "26.1.0"
+  },
+  "devDependencies": {
+    "css-tree": "3.2.1",
+    "yaml": "2.9.0"
+  }
+}

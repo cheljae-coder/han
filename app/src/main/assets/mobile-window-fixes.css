@@ -1,0 +1,357 @@
+/* R46 mobile window safety layer.
+   Keeps every full-screen gate, backdrop and dialog inside the visible phone area. */
+
+:root {
+  --r46-safe-top: max(10px, env(safe-area-inset-top));
+  --r46-safe-right: max(10px, env(safe-area-inset-right));
+  --r46-safe-bottom: max(10px, env(safe-area-inset-bottom));
+  --r46-safe-left: max(10px, env(safe-area-inset-left));
+  --r46-visible-height: 100dvh;
+}
+
+@supports not (height: 100dvh) {
+  :root { --r46-visible-height: 100vh; }
+}
+
+html,
+body,
+#root,
+.shell {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+html,
+body {
+  min-height: 100%;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+img,
+svg,
+canvas,
+video {
+  max-width: 100%;
+}
+
+input,
+select,
+textarea,
+button {
+  min-width: 0;
+  max-width: 100%;
+}
+
+textarea {
+  resize: vertical;
+}
+
+/* Login and first-password registration screen */
+.auth-gate {
+  height: var(--r46-visible-height) !important;
+  min-height: 0 !important;
+  padding: var(--r46-safe-top) var(--r46-safe-right) var(--r46-safe-bottom) var(--r46-safe-left) !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.auth-card {
+  flex: 0 0 auto;
+  width: min(440px, 100%) !important;
+  max-width: 100% !important;
+  max-height: none !important;
+  margin: auto 0 !important;
+  overflow: visible !important;
+}
+
+/* Every modal overlay uses the visible viewport and owns the scrolling. */
+.profile-backdrop,
+.security-backdrop,
+.calving-backdrop,
+.exit-backdrop {
+  width: 100% !important;
+  height: var(--r46-visible-height) !important;
+  min-height: 0 !important;
+  padding: var(--r46-safe-top) var(--r46-safe-right) var(--r46-safe-bottom) var(--r46-safe-left) !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.profile-dialog,
+.security-dialog,
+.calving-dialog,
+.exit-dialog {
+  flex: 0 0 auto;
+  width: min(var(--r46-dialog-width, 900px), 100%) !important;
+  max-width: 100% !important;
+  max-height: calc(var(--r46-visible-height) - var(--r46-safe-top) - var(--r46-safe-bottom)) !important;
+  margin: auto 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
+}
+
+.security-dialog { --r46-dialog-width: 690px; }
+.calving-dialog { --r46-dialog-width: 560px; }
+.exit-dialog { --r46-dialog-width: 440px; }
+
+.profile-dialog > *,
+.security-dialog > *,
+.calving-dialog > *,
+.exit-dialog > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.security-dialog > div:last-child,
+.profile-actions,
+.calving-actions,
+.exit-dialog > div,
+.form-actions,
+.detail-actions,
+.market-setting-buttons {
+  max-width: 100%;
+  flex-wrap: wrap;
+}
+
+/* Long content and tables stay within their cards and scroll horizontally only where required. */
+.panel,
+.pro-card,
+.data-table,
+.cattle-detail-table-scroll,
+.herd-summary-table,
+.professional-tabs,
+.startup-alert-list {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.data-table,
+.cattle-detail-table-scroll,
+.herd-summary-table,
+.pro-card,
+.professional-tabs {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 520px) {
+  .auth-card,
+  .profile-dialog,
+  .security-dialog,
+  .calving-dialog,
+  .exit-dialog {
+    border-radius: 14px !important;
+    padding: 18px 14px !important;
+  }
+
+  .auth-card h1,
+  .profile-dialog h2,
+  .security-dialog h2,
+  .calving-dialog h2,
+  .exit-dialog h2 {
+    font-size: clamp(21px, 6.4vw, 26px) !important;
+    overflow-wrap: anywhere;
+  }
+
+  .auth-card > p,
+  .security-dialog p,
+  .calving-dialog > p,
+  .exit-dialog p {
+    margin-bottom: 14px;
+    font-size: 15px !important;
+    line-height: 1.5 !important;
+  }
+
+  .auth-card form,
+  .recovery-dialog,
+  .farm-profile-form {
+    gap: 10px !important;
+  }
+
+  .two,
+  .three,
+  .pro-form,
+  .bulk-delete-summary,
+  .alert-counts,
+  .startup-alert-list p {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .security-dialog > div:last-child,
+  .profile-actions,
+  .calving-actions,
+  .exit-dialog > div,
+  .form-actions,
+  .detail-actions,
+  .market-setting-buttons {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .security-dialog > div:last-child > *,
+  .profile-actions > *,
+  .calving-actions > *,
+  .exit-dialog > div > *,
+  .form-actions > *,
+  .detail-actions > *,
+  .market-setting-buttons > * {
+    width: 100% !important;
+    min-height: 48px;
+  }
+
+  .inline-actions {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .inline-actions > * {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .recovery-code-dialog output {
+    padding: 12px 8px !important;
+    font-size: clamp(14px, 4.5vw, 18px) !important;
+    letter-spacing: 0 !important;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 360px), (max-height: 600px) {
+  .auth-card,
+  .profile-dialog,
+  .security-dialog,
+  .calving-dialog,
+  .exit-dialog {
+    padding: 14px 11px !important;
+    border-radius: 11px !important;
+  }
+
+  .auth-card > small,
+  .auth-card > em,
+  .auth-creator {
+    line-height: 1.35 !important;
+  }
+
+  .auth-card input,
+  .security-dialog input,
+  .auth-card button,
+  .security-dialog button {
+    padding-top: 11px !important;
+    padding-bottom: 11px !important;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .auth-card,
+  .profile-dialog,
+  .security-dialog,
+  .calving-dialog,
+  .exit-dialog {
+    margin: 0 auto !important;
+  }
+}
+
+/* R46 phone text layout.
+   Control labels stay on one line when space allows and wrap to at most two lines. */
+:where(
+  button,
+  [role="button"],
+  .file-action,
+  .password-reset-link,
+  .professional-tabs > *,
+  .cattle-page-nav > *,
+  .cattle-management-nav > *,
+  .cattle-detail-quicknav > *,
+  .all-menu-grid button,
+  aside nav button
+) {
+  white-space: normal !important;
+  word-break: keep-all !important;
+  overflow-wrap: break-word !important;
+  line-height: 1.35 !important;
+}
+
+.r46-control-label,
+:where(
+  button,
+  [role="button"],
+  .file-action,
+  .password-reset-link
+) > :where(b, strong):only-child,
+:where(
+  .professional-tabs,
+  .cattle-page-nav,
+  .cattle-management-nav,
+  .cattle-detail-quicknav
+) :where(b, strong, span):only-child {
+  min-width: 0;
+  max-width: 100%;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal !important;
+  word-break: keep-all !important;
+  overflow-wrap: break-word !important;
+  line-height: 1.35 !important;
+}
+
+:where(
+  .page-title-row h1,
+  .detail-heading h2,
+  .command-heading h2,
+  .all-menu-grid h3,
+  .auth-card h1,
+  .profile-dialog h2,
+  .security-dialog h2,
+  .calving-dialog h2,
+  .exit-dialog h2
+) {
+  max-width: 100%;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  white-space: normal !important;
+  word-break: keep-all !important;
+  overflow-wrap: break-word !important;
+  line-height: 1.3 !important;
+}
+
+@media (max-width: 520px) {
+  :where(
+    button,
+    [role="button"],
+    .file-action,
+    .password-reset-link
+  ) {
+    min-height: 48px;
+    height: auto;
+  }
+}

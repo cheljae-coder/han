@@ -1,0 +1,17 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import {JSDOM} from "jsdom";
+const root=path.resolve(import.meta.dirname,"..");
+const source=fs.readFileSync(path.join(root,"app/src/main/assets/license-file-parser-v49.js"),"utf8");
+const dom=new JSDOM("<!doctype html><body></body>",{runScripts:"outside-only"});
+dom.window.eval(source);
+const extract=dom.window.SmartHanwooLicenseFileParser.extractTokens;
+const token1="SHM1.abc_DEF-123.sig_456-XYZ";
+const token2="SHM1.second-token.second-signature";
+assert.deepEqual(Array.from(extract(token1)),[token1]);
+assert.deepEqual(Array.from(extract(`고객명,기기번호,연장코드\n홍길동,ANDROID-1,"${token1}"`)),[token1]);
+assert.deepEqual(Array.from(extract(`token\n${token1}\n${token2}\n${token1}`)),[token1,token2]);
+assert.deepEqual(Array.from(extract("개체번호,이름\n1,한우")),[]);
+dom.window.close();
+console.log("PASS: SHMLIC·CSV 연장코드 추출 4항목");
