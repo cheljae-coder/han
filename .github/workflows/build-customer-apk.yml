@@ -1,0 +1,60 @@
+name: 고객용 한우관리 APK 만들기
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["**"]
+
+permissions:
+  contents: read
+
+jobs:
+  customer_android:
+    name: customer-android
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: qa/package-lock.json
+      - name: 고객용 프로젝트 검사
+        run: |
+          npm ci --prefix qa --no-audit --no-fund
+          npm test --prefix qa
+          bash -n scripts/build-customer-apk.sh
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Java 소스와 파일 선택 형식 검사
+        run: |
+          mkdir -p qa/java-test
+          javac -encoding UTF-8 -source 17 -target 17 -d qa/java-test \
+            app/src/main/java/kr/co/hanwoo/smartmanager/FileChooserMime.java \
+            qa/FileChooserMimeTest.java
+          java -cp qa/java-test FileChooserMimeTest
+      - name: Android SDK 35 준비
+        run: |
+          set -Eeuo pipefail
+          sdk_root="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
+          sdkmanager_path="$(find "$sdk_root/cmdline-tools" -type f -path '*/bin/sdkmanager' -print | sort -V | tail -n 1)"
+          test -x "$sdkmanager_path"
+          "$sdkmanager_path" --install "platforms;android-35" "build-tools;35.0.0"
+      - name: 고객용 APK 빌드·서명·검증
+        env:
+          HANWOO_KEYSTORE_PASSWORD: ${{ secrets.HANWOO_KEYSTORE_PASSWORD }}
+          HANWOO_KEY_PASSWORD: ${{ secrets.HANWOO_KEY_PASSWORD }}
+        run: |
+          chmod +x scripts/build-customer-apk.sh
+          scripts/build-customer-apk.sh
+      - uses: actions/upload-artifact@v6
+        with:
+          name: SmartHanwooManager-R50-Customer-APK
+          path: |
+            dist/SmartHanwooManager-R50.apk
+            dist/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 30
